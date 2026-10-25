@@ -1,0 +1,64 @@
+services:
+  bot-service:
+    build: ./bot-service
+    restart: unless-stopped
+    environment:
+      BOT_TOKEN: ${BOT_TOKEN}
+      USER_SERVICE_URL: http://user-service:8000
+      ANIME_SERVICE_URL: http://anime-service:8001
+      ADMIN_EVENTS_URL: http://admin-service:8080/internal/events
+      YOUTUBE_SERVICE_URL: http://youtube-service:8000
+      PINTEREST_SERVICE_URL: http://pinterest-service:8000
+      EVENT_TOKEN: ${EVENT_TOKEN}
+    depends_on:
+      - user-service
+
+  user-service:
+    build: ./services/user-service
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8000:8000"
+
+  anime-service:
+    build: ./services/anime-service
+    restart: unless-stopped
+    environment:
+      YUMMY_API_TOKEN: ${YUMMY_API_TOKEN}
+    ports:
+      - "127.0.0.1:8001:8001"
+  admin-service:
+    build: ./services/admin-service
+    restart: unless-stopped
+    environment:
+      ADMIN_USER: ${ADMIN_USER}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD}
+      EVENT_TOKEN: ${EVENT_TOKEN}
+      DB_PATH: /data/admin.db
+    ports:
+      - "127.0.0.1:8080:8080"
+    volumes:
+      - admin_data:/data
+  youtube-service:
+    build: ./services/youtube-service
+    restart: unless-stopped
+    environment:
+      MAX_VIDEO_BYTES: "47185920"
+      MAX_DURATION_SECONDS: "900"
+      MAX_CONCURRENT_DOWNLOADS: "2"
+    read_only: true
+    cpus: 4
+    tmpfs:
+      - /tmp:size=512m,mode=1777
+    security_opt:
+      - no-new-privileges:true
+    # No ports: reachable only by other services on the Compose network.
+
+  pinterest-service:
+    build: ./services/pinterest-service
+    restart: unless-stopped
+    read_only: true
+    security_opt:
+      - no-new-privileges:true
+    # Без внешнего порта: доступ только через Compose.
+volumes:
+  admin_data:

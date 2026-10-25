@@ -1,0 +1,12 @@
+services/youtube-service/__pycache__
+services/admin-service/__pycache__
+services/anime-service/__pycache__
+
+services/admin-service/tests/__pycache__
+services/anime-service/tests/__pycache__
+services/youtube-service/tests/__pycache__
+
+secrets
+.env
+.venv
+.pytest_cache
